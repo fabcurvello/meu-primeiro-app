@@ -1,5 +1,7 @@
-import { Component, signal, computed, effect } from '@angular/core';
+import { Component, signal, computed, effect, inject } from '@angular/core';
+
 import { Produto } from '../produto/produto';
+import { ProdutosService } from '../produtos.service';
 
 @Component({
   selector: 'app-lista-produtos',
@@ -8,14 +10,14 @@ import { Produto } from '../produto/produto';
   styleUrl: './lista-produtos.css',
 })
 export class ListaProdutos {
+  private produtosService = inject(ProdutosService);
+
   // SIGNALS
 
   // writable signal -> signal (reativo) que permite alterações (com set ou update)
-  produtos = signal([
-    { nome: 'Notebook', preco: 3800 },
-    { nome: 'Mouse', preco: 150 },
-    { nome: 'Fone', preco: 80 },
-  ]);
+  produtos = signal<{ nome: string; preco: number }[]>([]);
+
+  carregando = signal(true);
 
   produtoSelecionado = signal<string | null>(null);
 
@@ -39,24 +41,39 @@ export class ListaProdutos {
   // EFFECTS
   // método construtor - formata os objetos criados a partir desta classe
   constructor() {
-    // estes 2 effects geram mensagens no terminal sempre que alterações são realizadas.
-    // effect observa alterações realizadas no signal (que é o vetor de produtos)
+    // carrega da API
+    this.carregarProdutos();
+
+    // effects continuam iguais
     effect(() => {
       console.log('Lista de produtos alterada:', this.produtos());
     });
 
-    // effect observa alterações do computed signal (valorTotal).
     effect(() => {
       console.log('Valor total atualizado:', this.valorTotal());
     });
-
-    // effect observa o title da página e altera se a condição for atendida
     effect(() => {
       if (typeof document !== 'undefined') {
         document.title = `(${this.totalProdutos()}) Minha Loja`;
       }
     });
-  } // fim do constructor
+  } // fim do construtor
+
+  carregarProdutos() {
+    this.carregando.set(true);
+
+    this.produtosService.buscarProdutos().subscribe({
+      next: (dados) => {
+        const produtos = this.produtosService.transformarProdutos(dados);
+        this.produtos.set(produtos);
+        this.carregando.set(false);
+      },
+      error: (erro) => {
+        console.error('Erro ao carregar produtos:', erro);
+        this.carregando.set(false);
+      },
+    });
+  }
 
   // AÇÕES QUE ALTERAM VALORES DE SIGNALS (SET E UPDATE)
 
