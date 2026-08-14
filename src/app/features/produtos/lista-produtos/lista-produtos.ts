@@ -1,11 +1,12 @@
 import { Component, signal, computed, effect, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 
 import { Produto } from '../produto/produto';
 import { ProdutosService } from '../produtos.service';
 
 @Component({
   selector: 'app-lista-produtos',
-  imports: [Produto],
+  imports: [Produto, MatButtonModule],
   templateUrl: './lista-produtos.html',
   styleUrl: './lista-produtos.css',
 })
