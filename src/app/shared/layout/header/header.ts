@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
-  import { MatToolbarModule } from '@angular/material/toolbar';
-  import { MatButtonModule } from '@angular/material/button';
-  import { RouterLink } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
+import { RouterLink } from '@angular/router';
 
+import { CarrinhoService } from '../../../core/services/carrinho.service';
 
 @Component({
   selector: 'app-header',
@@ -10,4 +11,7 @@ import { Component } from '@angular/core';
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
-export class Header {}
+export class Header {
+  private carrinhoService = inject(CarrinhoService);
+  quantidade = this.carrinhoService.quantidade;
+}
